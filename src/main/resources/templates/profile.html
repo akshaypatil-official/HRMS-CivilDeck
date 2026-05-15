@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- Fixed Namespace -->
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Profile</title>
+    <style>
+        /* Base Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f0f2f5; color: #333; }
+
+        /* Navbar */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: white; position: sticky; top: 0;
+            z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #007bff; }
+        .nav-links { display: flex; list-style: none; }
+        .nav-links li { margin-left: 20px; }
+        .nav-links a { text-decoration: none; color: #555; font-weight: 500; }
+
+        /* Profile Card */
+        .profile-container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .profile-card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .profile-header { text-align: center; margin-bottom: 30px; }
+        .profile-pic { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #007bff; }
+
+        .profile-info-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+            padding: 20px; background: #f8f9fa; border-radius: 10px;
+        }
+        .info-item label { display: block; font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .info-item p { font-weight: 600; color: #333; }
+
+        .designation-badge {
+            display: inline-block; background: #e7f1ff; color: #007bff;
+            padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px;
+        }
+
+        @media (max-width: 600px) { .profile-info-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="logo">CompanyLogo</div>
+    <nav>
+        <ul class="nav-links">
+            <li><a th:href="@{/timesheets}">Timesheet</a></li>
+            <li><a th:href="@{/profile}">My Profile</a></li>
+            <li><a th:href="@{/employees}">Employee List</a></li>
+            <li><a th:href="@{/labourRecords}">Labour Entries</a></li>
+            <li><a th:href="@{/logout}">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="profile-container">
+  <!-- Only renders if 'user' is successfully passed from Controller -->
+  <div class="profile-card" th:if="${user != null}">
+    
+    <section class="profile-header">
+      <!-- <img th:src="${user.photoUrl != null ? user.photoUrl : '/images/default.png'}" 
+           alt="Employee Photo" class="profile-pic"> -->
+      <h1 th:text="${user.firstName}">Employee Name</h1>
+      <p class="designation-badge" th:text="${user.designation}">Designation</p>
+    </section>
+
+    <section class="profile-info-grid">
+      <div class="info-item"><label>Email ID</label><p th:text="${user.email}">example@mail.com</p></div>
+      <div class="info-item"><label>Phone No.</label><p th:text="${user.phoneNo}">N/A</p></div>
+      <div class="info-item"><label>Joining Date</label><p th:text="${user.doj}">N/A</p></div>
+      <div class="info-item"><label>Date of Birth</label><p th:text="${user.dob}">N/A</p></div>
+      <div class="info-item"><label>Gender</label><p th:text="${user.gender}">N/A</p></div>
+      <div class="info-item"><label>Address</label><p th:text="${user.address}">N/A</p></div>
+    </section>
+
+  <!-- Error display if DB fetch fails -->
+  <div th:unless="${user != null}" style="text-align: center; color: red; margin-top: 50px;">
+      <p>Error: Could not retrieve your profile. Please check your login session.</p>
+  </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Employee Management</title>
+<style>
+/* Base Styles */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+	background-color: #f0f2f5;
+	color: #333;
+}
+
+/* Navbar */
+.navbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 5%;
+	background: white;
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: #007bff;
+}
+
+.nav-links {
+	display: flex;
+	list-style: none;
+}
+
+.nav-links li {
+	margin-left: 20px;
+}
+
+.nav-links a {
+	text-decoration: none;
+	color: #555;
+	font-weight: 500;
+}
+
+/* Layout Container */
+.container {
+	max-width: 1000px;
+	margin: 50px auto;
+	padding: 20px;
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.action-bar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.action-bar form {
+	display: flex;
+	gap: 10px;
+}
+
+.action-bar input[type="text"] {
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	width: 250px;
+}
+
+/* Buttons */
+.btn-search {
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	padding: 8px 15px;
+	cursor: pointer;
+}
+
+.btn-add {
+	background-color: #28a745;
+	color: white;
+	padding: 8px 15px;
+	text-decoration: none;
+	border-radius: 4px;
+}
+
+.btn-edit {
+	background-color: #ffc107;
+	color: #212529;
+	text-decoration: none;
+	padding: 5px 10px;
+	border-radius: 4px;
+	margin-right: 5px;
+	font-size: 14px;
+}
+
+.btn-delete {
+	background-color: #dc3545;
+	color: white;
+	text-decoration: none;
+	padding: 5px 10px;
+	border-radius: 4px;
+	font-size: 14px;
+}
+
+/* Table */
+.employee-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: white;
+	margin-top: 10px;
+}
+
+.employee-table th, .employee-table td {
+	padding: 12px 15px;
+	text-align: left;
+	border-bottom: 1px solid #eee;
+}
+
+.employee-table thead {
+	background-color: #343a40;
+	color: white;
+}
+
+.employee-table tbody tr:hover {
+	background-color: #f1f1f1;
+}
+</style>
+</head>
+<body>
+
+	<header class="navbar">
+		<div class="logo">CompanyLogo</div>
+		<nav>
+			<ul class="nav-links">
+				<li><a th:href="@{/timesheets}">Timesheet</a></li>
+				<li><a th:href="@{/profile}">My Profile</a></li>
+				<li><a th:href="@{/employees}">Employee List</a></li>
+				<li><a th:href="@{/labourRecords}">Labour Entries</a></li>
+				<li><a th:href="@{/logout}">Logout</a></li>
+			</ul>
+		</nav>
+	</header>
+
+	<main class="container">
+		<h2>Employee Management</h2>
+
+		<!-- Search and Add Section -->
+		<div class="action-bar">
+			<!-- Matches @GetMapping("/employees") -->
+			<form th:action="@{/employees}" method="get">
+				<input type="text" name="keyword"
+					placeholder="Search by first name..." th:value="${keyword}">
+				<button type="submit" class="btn-search">Search</button>
+				<a th:if="${keyword != null}" th:href="@{/employees}"
+					style="font-size: 13px; align-self: center;">Clear</a>
+			</form>
+			<a th:href="@{/registrations}" class="btn-add">Add Employee</a>
+		</div>
+
+		<!-- Employee Table -->
+		<table class="employee-table">
+			<thead>
+				<tr>
+					<th>Full Name</th>
+					<th>Email</th>
+					<th>Phone No</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+    <!-- Iterates over listEmployees from Controller -->
+    <tr th:each="employee : ${listEmployees}">
+        <!-- Using literal substitution for cleaner name concatenation -->
+        <td th:text="|${employee.firstName} ${employee.lastName}|"></td>
+        <td th:text="${employee.email}"></td>
+        <td th:text="${employee.phoneNo}"></td>
+        <td>
+            <!-- Corrected Edit link with dynamic ID -->
+            <a class="btn-edit" th:href="@{/employees/edit/{id}(id=${employee.user_id})}">Edit</a>
+            
+            <!-- Fixed typo in class name and added missing space before th:href -->
+           <a class="btn-delete" 
+   th:href="@{/employees/delete/{id}(id=${employee.user_id})}" 
+   onclick="return confirm('Are you sure?')">Delete</a>
+    </tr>
+
+    <!-- Empty State -->
+    <tr th:if="${#lists.isEmpty(listEmployees)}">
+        <td colspan="4" style="text-align: center;">No employees found.</td>
+    </tr>
+</tbody>
+		</table>
+	</main>
+
+</body>
+</html>
