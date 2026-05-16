@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,13 +37,39 @@ public class TimesheetController {
 	@Autowired
 	private UserService userService;
 
-    @GetMapping
-    public String showTimesheetPage(Model model, Principal principal) {
-        model.addAttribute("timesheets", timesheetService.getTimesheetsByUser(principal.getName()));
-        model.addAttribute("timesheet", new Timesheet());
-        return "Timesheet";
-    }
+//    @GetMapping
+//    public String showTimesheetPage(Model model, Principal principal) {
+//        model.addAttribute("timesheets", timesheetService.getTimesheetsByUser(principal.getName()));
+//        model.addAttribute("timesheet", new Timesheet());
+//        return "Timesheet";
+//    }
 
+	
+	 @GetMapping
+	    public String showTimesheetPage(
+	            Model model, 
+	            Principal principal, 
+	            @RequestParam(defaultValue = "0") int page) {
+	        
+	        int pageSize = 10;
+	        Pageable pageable = PageRequest.of(page, pageSize);
+	        
+	        // 1. Declare and fetch the paginated page object using the principal name
+	        Page<Timesheet> timesheetPage = timesheetService.getTimesheetsByUser(principal.getName(), pageable);
+	        
+	        // 2. Add structural pagination metadata to model
+	        model.addAttribute("currentPage", page);
+	        model.addAttribute("totalPages", timesheetPage.getTotalPages());
+	        
+	        // 3. Extract and pass ONLY the list of 10 items for the current page
+	        model.addAttribute("timesheets", timesheetPage.getContent());
+	        
+	        // 4. Pass empty object for your form binding
+	        model.addAttribute("timesheet", new Timesheet()); 
+	        
+	        return "Timesheet";
+	    }
+	
     @PostMapping("/save")
     public String saveTimesheet(@ModelAttribute("timesheet") Timesheet timesheet, Principal principal) {
         if (principal == null) {
@@ -81,10 +110,11 @@ public class TimesheetController {
         String currentUserName = firstName + " " + lastName;
 
         System.out.println("Exporting for user: " + currentUserName);
-
+        String safeFileName = currentUserName.replaceAll("[^a-zA-Z0-9.-]", "_");
+        String finalFileName = "Timesheet_Report_" + safeFileName + ".xlsx";
         // 3. Set response headers
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=Timesheet_Report.xlsx");
+        response.setHeader("Content-Disposition",  "attachment; filename=\"" + finalFileName + "\"");
 
         // 4. Pass list and dynamic name to the Exporter
         TimesheetExcelExporter exporter = new TimesheetExcelExporter(listTimesheets, currentUserName);

@@ -3,6 +3,8 @@ package com.org.ServiceImpl;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.org.Entity.Timesheet;
 import com.org.Entity.User;
@@ -28,11 +30,22 @@ public class TimesheetServiceImpl implements TimesheetService{
 //	        timesheetRepo.save(timesheet);
 //	    }
 
+	    
+//	    @Override
+//	    public List<Timesheet> getTimesheetsByUser(String email) {
+//	        User user = userRepo.findByEmail(email);
+//	        return timesheetRepo.findByUser(user);
+//	    }
+//	    
+	    
+	    
 	    @Override
-	    public List<Timesheet> getTimesheetsByUser(String email) {
-	        User user = userRepo.findByEmail(email);
-	        return timesheetRepo.findByUser(user);
+	    public Page<Timesheet> getTimesheetsByUser(String email, Pageable pageable) {
+	    	User user = userRepo.findByEmail(email);
+	        return timesheetRepo.findByUser(user, pageable);
 	    }
+	    
+	    
 	    
 	    @Override
 	    @Transactional
@@ -74,5 +87,5 @@ public class TimesheetServiceImpl implements TimesheetService{
 			 return timesheetRepo.findAll();
 		}
 	    
-	
+		
 }

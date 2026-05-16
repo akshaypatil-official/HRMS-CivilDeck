@@ -3,17 +3,21 @@ package com.org.Service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.org.Entity.Timesheet;
 
 public interface TimesheetService {
 
 	 void saveTimesheet(Timesheet timesheet, String email);
 	 
-	    List<Timesheet> getTimesheetsByUser(String email);
+//	    List<Timesheet> getTimesheetsByUser(String email);
 	    
 	   
 		List<Timesheet> findAll();
 	 
-	    
+
+		Page<Timesheet> getTimesheetsByUser(String email, Pageable pageable);
 	    
 }
