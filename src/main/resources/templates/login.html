@@ -14,6 +14,22 @@
 <title>Login</title>
 <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
 </head>
+<style>
+.logo-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 10px;
+}
+
+.logo-wrapper img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    margin-left: 10xp;
+}
+</style>
 <body>
 	<section class="vh-100" style="background-color: #9A616D;">
 		<div class="container py-5 h-100">
@@ -22,10 +38,9 @@
 				<div class="col col-xl-10">
 					<div class="card" style="border-radius: 1rem;">
 						<div class="row g-0">
-							<div class="col-md-6 col-lg-5 d-none d-md-block">
-								<img src="" alt="login form" class="img-fluid"
-									style="border-radius: 1rem 0 0 1rem;" />
-							</div>
+							 <div class="logo-wrapper">
+            <img th:src="@{/images/civil_deck_logo.png}" alt="App Logo" width="350"/>
+        </div>
 							<div class="col-md-6 col-lg-7 d-flex align-items-center">
 								<div class="card-body p-4 p-lg-5 text-black">
 
@@ -66,7 +81,7 @@
 
 										<a class="small text-muted" href="#!">Forgot password?</a>
 										<p class="mb-5 pb-lg-2" style="color: #393f81;">
-											Don't have an account? <a th:href="@{/registration}"
+											Don't have an account? <a th:href="@{/registrations}"
 												style="color: #393f81;">Register here</a>
 										</p>
 									</form>

@@ -28,7 +28,7 @@ public class SecurityConfiguration {
 	    http 
 	        .authorizeHttpRequests((requests) -> requests 
 	            // Public assets and pages
-	            .requestMatchers("/registration**", "/js/**", "/css/**", "/img/**", "/error").permitAll() 
+	            .requestMatchers("/registration**", "/js/**", "/css/**", "/images/**", "/error").permitAll() 
 	            // Role-based access control
 	            .requestMatchers("/admin/**").hasRole("ADMIN")
 	            .requestMatchers("/management/**").hasAnyRole("ADMIN", "MANAGER")

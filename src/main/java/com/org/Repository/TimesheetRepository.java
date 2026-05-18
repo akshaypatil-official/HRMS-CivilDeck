@@ -26,4 +26,6 @@ public interface TimesheetRepository extends JpaRepository<Timesheet, Long> {
 
 	 Page<Timesheet> findByUser(User user, Pageable pageable);
 	 
+	
+	    Timesheet findTopByUserOrderByDateDesc(User user);
 }

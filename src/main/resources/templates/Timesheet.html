@@ -17,52 +17,93 @@
             --card-bg: #ffffff;
             --border: #e5e7eb;
         }
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
+/* Navbar Container */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a252f; /* Deep corporate blue/gray */
+    padding: 15px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-        body {
-            background-color: #f0f2f5;
-            color: #333;
-        }
+/* Logo Styling */
+.logo {
+    color: #f39c12; /* Vibrant construction amber/gold */
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
 
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
-            background: white;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+/* Navigation Links Wrapper */
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+    align-items: center;
+}
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #007bff;
-        }
+/* Individual Link Styling */
+.nav-links li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
 
-        .nav-links {
-            display: flex;
-            list-style: none;
-        }
+/* Hover Effect for Regular Links */
+.nav-links li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #f39c12;
+}
 
-        .nav-links li {
-            margin-left: 20px;
-        }
+/* Special Styling for Logout Button */
+.nav-links li:last-child a {
+    background-color: #e74c3c; /* Accent red for logout */
+    color: #ffffff;
+}
 
-        .nav-links a {
-            text-decoration: none;
-            color: #555;
-            font-weight: 500;
-        }
+.nav-links li:last-child a:hover {
+    background-color: #c0392b;
+    color: #ffffff;
+}
 
+/* Responsive Design for Mobile Devices */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-links li a {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}
+
+       
         .main-container {
             max-width: 1435px;
             margin: 40px auto;
@@ -243,18 +284,19 @@
     <script src="https://googleapis.com"></script>
 </head>
 <body>
-    <header class="navbar">
-        <div class="logo">CompanyLogo</div>
-        <nav>
-            <ul class="nav-links">
-                <li><a th:href="@{/timesheets}">Timesheet</a></li>
-                <li><a th:href="@{/profile}">My Profile</a></li>
-                <li><a th:href="@{/employees}">Employee List</a></li>
-                <li><a th:href="@{/labourRecords}">Labour Entries</a></li>
-                <li><a th:href="@{/logout}">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
+   <header class="navbar">
+		<div class="logo">CIVIL DECK INRAPROJECTS</div>
+		<nav>
+			<ul class="nav-links">
+				<li><a th:href="@{/timesheets}">Timesheet</a></li>
+				<li><a th:href="@{/profile}">My Profile</a></li>
+				<li><a th:href="@{/employees}">Employee List</a></li>
+				<li><a th:href="@{/purchases}">Purchase</a></li>
+				<li><a th:href="@{/labourRecords}">Labour Entries</a></li>
+				<li><a th:href="@{/logout}">Logout</a></li>
+			</ul>
+		</nav>
+	</header>
     
     <div class="main-container">
         <!-- LEFT: FORM -->

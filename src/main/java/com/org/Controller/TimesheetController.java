@@ -84,6 +84,7 @@ public class TimesheetController {
         }
     }
     
+   
     @GetMapping("/search")
     public ResponseEntity<List<Map<String, Object>>> searchLogs(
             @RequestParam(required = false, defaultValue = "") String firstName,
