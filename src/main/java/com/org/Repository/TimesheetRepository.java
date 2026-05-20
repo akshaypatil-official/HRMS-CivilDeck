@@ -28,4 +28,8 @@ public interface TimesheetRepository extends JpaRepository<Timesheet, Long> {
 	 
 	
 	    Timesheet findTopByUserOrderByDateDesc(User user);
+	    
+	    
+	    boolean existsByUserAndDate(User user, LocalDate date);
+	   
 }

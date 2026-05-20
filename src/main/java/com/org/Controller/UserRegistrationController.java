@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.org.DTO.UserRegistrationDto;
 import com.org.Entity.Role;
+import com.org.Repository.CompanyRepository;
 import com.org.Repository.RoleRepository;
 import com.org.Service.UserService;
 
@@ -24,11 +25,14 @@ public class UserRegistrationController {
 	    @Autowired
 	    private UserService userService;
         
+	    private final CompanyRepository companyRepo;
+	    
 	    private final RoleRepository roleRepository;
 	    
-	    public UserRegistrationController(UserService userService, RoleRepository roleRepository) {
+	    public UserRegistrationController(CompanyRepository companyRepo,UserService userService, RoleRepository roleRepository) {
 			super();
 			this.userService = userService;
+			this.companyRepo = companyRepo;
 			this.roleRepository=roleRepository;
 		}
 	    
@@ -41,6 +45,7 @@ public class UserRegistrationController {
 	    public String showRegistrationForm(Model model) {
 	        List<Role> roles = roleRepository.findAll();
 	        model.addAttribute("allRoles", roles);
+	        model.addAttribute("companies", companyRepo.findAll());
 	        return "registration";
 	    }
 

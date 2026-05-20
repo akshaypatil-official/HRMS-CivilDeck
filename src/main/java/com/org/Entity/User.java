@@ -52,12 +52,20 @@ public class User {
     )
     private Collection<Role> roles;
 
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "company_id", nullable = true) // Changed to true temporarily
+	private Company company;
+	
 	 public User() {
 	    }
 	 
 	// Parameterized Constructor
-	public User(String firstName, String lastName, String dob, String doj, String phoneNo, String designation,
-			String address, String gender, String email, String password, Collection<Role> roles) {
+	public User(Long user_id, String firstName, String lastName, String dob, String doj, String phoneNo,
+			String designation, String address, String gender, String email, String password, Collection<Role> roles,
+			Company company) {
+		super();
+		this.user_id = user_id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.dob = dob;
@@ -69,6 +77,7 @@ public class User {
 		this.email = email;
 		this.password = password;
 		this.roles = roles;
+		this.company = company;
 	}
 
 	// Getters and Setters
@@ -168,6 +177,12 @@ public class User {
 		this.gender = gender;
 	}
 
-	
+	public Company getCompany() {
+		return company;
+	}
+
+	public void setCompany(Company company) {
+		this.company = company;
+	}
 
 }

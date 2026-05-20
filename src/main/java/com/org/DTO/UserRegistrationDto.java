@@ -13,12 +13,14 @@ public class UserRegistrationDto {
 	    private String address;
 	    private String gender;
 	    private String role_Id;
+	    private Long companyId;
 	    public UserRegistrationDto() {
 	    	
 	    }
 
-		public UserRegistrationDto(String firstName, String lastName, String dob,
-				String doj, String phoneNo, String designation, String address, String gender,String email, String password, String role_Id) {
+		public UserRegistrationDto(String firstName, String lastName, String email, String password, String dob,
+				String doj, String phoneNo, String designation, String address, String gender, String role_Id,
+				Long companyId) {
 			super();
 			this.firstName = firstName;
 			this.lastName = lastName;
@@ -31,7 +33,9 @@ public class UserRegistrationDto {
 			this.address = address;
 			this.gender = gender;
 			this.role_Id = role_Id;
+			this.companyId = companyId;
 		}
+
 		public String getFirstName() {
 			return firstName;
 		}
@@ -107,6 +111,16 @@ public class UserRegistrationDto {
 		public void setRole_Id(String role_Id) {
 			this.role_Id = role_Id;
 		}
+
+		public Long getCompanyId() {
+			return companyId;
+		}
+
+		public void setCompanyId(Long companyId) {
+			this.companyId = companyId;
+		}
+
+
 
     
 }

@@ -19,8 +19,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.org.DTO.UserRegistrationDto;
+import com.org.Entity.Company;
 import com.org.Entity.Role;
 import com.org.Entity.User;
+import com.org.Repository.CompanyRepository;
 import com.org.Repository.RoleRepository;
 import com.org.Repository.UserRepository;
 import com.org.Service.UserService;
@@ -34,38 +36,54 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     
     private final RoleRepository roleRepository;
+    
+    private CompanyRepository companyRepo;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository,RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository,RoleRepository roleRepository,CompanyRepository companyRepo) {
         super();
         this.userRepository = userRepository;
         this.roleRepository=roleRepository;
+        this.companyRepo =companyRepo;
     }
 
     @Override 
     public User save(UserRegistrationDto dto) {
-        // 1. Get the Role
+        // 1. Fetch and validate the Role Entity
         Long roleId = Long.parseLong(dto.getRole_Id());
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new IllegalArgumentException("Role ID " + roleId + " not found"));
+        
+        // 2. Fetch and validate the Company Entity
+        if (dto.getCompanyId() == null) {
+            throw new IllegalArgumentException("Company selection is required.");
+        }
+        Company company = companyRepo.findById(dto.getCompanyId())
+                .orElseThrow(() -> new IllegalArgumentException("Company ID " + dto.getCompanyId() + " not found"));
+        
+        // 3. Create a fresh User instance using an empty constructor
+        User user = new User();
+        
+        // 4. Assign text and relation fields safely using Setters
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setPhoneNo(dto.getPhoneNo());
+        user.setDesignation(dto.getDesignation());
+        user.setAddress(dto.getAddress());
+        user.setGender(dto.getGender());
+        user.setEmail(dto.getEmail());
+        user.setCompany(company); // Links the full Company entity block safely
+        user.setPassword(passwordEncoder.encode(dto.getPassword())); // Encrypts the password
+        user.setDob(dto.getDob());
+        user.setDoj(dto.getDoj());
+        // 6. Set the Role relationship list collection
+        List<Role> rolesList = new ArrayList<>();
+        rolesList.add(role);
+        user.setRoles(rolesList);
 
-        // 2. Create and Save User
-        User user = new User(
-            dto.getFirstName(), 
-            dto.getLastName(), 
-            dto.getDob(), 
-            dto.getDoj(), 
-            dto.getPhoneNo(), 
-            dto.getDesignation(), 
-            dto.getAddress(), 
-            dto.getGender(), 
-            dto.getEmail(), 
-            passwordEncoder.encode(dto.getPassword()), 
-            Arrays.asList(role)
-        );
-
+        // 7. Save to database
         return userRepository.save(user);
     }
 
@@ -160,15 +178,23 @@ public class UserServiceImpl implements UserService {
         }
         return "";
     }
+
+	@Override
+	public List<String> getAllActiveUsernames() {
+		
+		return null;
+	}
+
+    
     
 	/*
-	 * @Override
+	 * @Override  
 	 * 
 	 * @Transactional public List<User> findByName(String firstName, String
 	 * lastName) { String fName = (firstName != null && !firstName.isEmpty()) ?
 	 * firstName : null; String lName = (lastName != null && !lastName.isEmpty()) ?
 	 * lastName : null;
-	 * 
+	 *   
 	 * return userRepository.searchByNamesProc(fName, lName); }
 	 */
 }	

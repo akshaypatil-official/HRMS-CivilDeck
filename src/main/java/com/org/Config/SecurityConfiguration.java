@@ -31,9 +31,9 @@ public class SecurityConfiguration {
 	            .requestMatchers("/registration**", "/js/**", "/css/**", "/images/**", "/error").permitAll() 
 	            // Role-based access control
 	            .requestMatchers("/admin/**").hasRole("ADMIN")
-	            .requestMatchers("/management/**").hasAnyRole("ADMIN", "MANAGER")
-	            .requestMatchers("/engineering/**").hasAnyRole("ADMIN", "ENGINEER")
-	            .requestMatchers("/finance/**").hasAnyRole("ADMIN", "ACCOUNTANT")
+	            .requestMatchers("/manager/**").hasAnyRole("ADMIN", "MANAGER")
+	            .requestMatchers("/engineer/**").hasAnyRole("ADMIN", "ENGINEER")
+	            .requestMatchers("/supervisor/**").hasAnyRole("ADMIN", "SUPERVISOR")
 	            // Everything else requires authentication
 	            .anyRequest().authenticated() 
 	        ) 
@@ -50,6 +50,8 @@ public class SecurityConfiguration {
 	                .permitAll()
 	            );
 	    return http.build(); 
+	    
+	    
 	}
 
 	@Autowired 

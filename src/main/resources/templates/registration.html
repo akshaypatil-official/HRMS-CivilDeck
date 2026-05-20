@@ -193,6 +193,16 @@ input[type="text"], input[type="date"], input[type="email"], input[type="passwor
 							th:text="${role.name}">Role Name</option>
 					</select>
 				</div>
+				<div>
+        <div>
+    <label for="company">Select Company:</label>
+    <select th:field="*{companyId}" id="company" required>
+        <option value="">-- Choose your company --</option>
+        <option th:each="comp : ${companies}" 
+                th:value="${comp.id}" 
+                th:text="${comp.name}">Company Name</option>
+    </select>
+</div>
 				<div class="gender-group">
 					<h4>Gender</h4>
 					<div class="gender-options">

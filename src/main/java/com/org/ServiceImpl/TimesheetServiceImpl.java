@@ -1,6 +1,7 @@
 package com.org.ServiceImpl;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,36 @@ public class TimesheetServiceImpl implements TimesheetService{
 	    
 	    @Override
 	    public Page<Timesheet> getTimesheetsByUser(String email, Pageable pageable) {
-	    	User user = userRepo.findByEmail(email);
+	        User user = userRepo.findByEmail(email);
+	        if (user == null) {
+	            return Page.empty(pageable);
+	        }
+
+	        // Auto-check the last 7 days for any missing entries (including yesterday)
+	        LocalDate today = LocalDate.now();
+	        for (int i = 1; i <= 2; i++) {
+	            LocalDate checkDate = today.minusDays(i);
+	            
+	            // Check if a record already exists for this past date
+	            boolean exists = timesheetRepo.existsByUserAndDate(user, checkDate);
+	            
+	            // If missing, automatically fill it as "Absent"
+	            if (!exists) {
+	                Timesheet absentRecord = new Timesheet();
+	                absentRecord.setUser(user);
+	                absentRecord.setDate(checkDate);
+	                absentRecord.setStatus("Absent");
+	                absentRecord.setTimeIn(LocalTime.parse("00:00"));  
+	                absentRecord.setTimeOut(LocalTime.parse("00:00"));
+	                absentRecord.setDescription("Absent");
+	                
+	                timesheetRepo.save(absentRecord);
+	            }
+	        }
+
+	        // Return the paginated entries with newest dates at the top
 	        return timesheetRepo.findByUser(user, pageable);
 	    }
-	    
 	    
 //	    
 //	    @Override
@@ -152,6 +179,19 @@ public class TimesheetServiceImpl implements TimesheetService{
 			// TODO Auto-generated method stub
 			 return timesheetRepo.findAll();
 		}
-	    
-		
+
+		@Override
+		public boolean hasUserLoggedTimeForDate(String email, LocalDate today) {
+		    // 1. Find the user by email first
+		    User user = userRepo.findByEmail(email);
+		    
+		    // 2. If the user doesn't exist, they haven't logged time
+		    if (user == null) {
+		        return false;
+		    }
+		    
+		    // 3. Query the repository using the User object and the date
+		    return timesheetRepo.existsByUserAndDate(user, today);
+		}
+	   
 }

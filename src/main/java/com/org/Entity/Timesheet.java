@@ -3,12 +3,14 @@ package com.org.Entity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -23,12 +25,24 @@ public class Timesheet {
     private LocalTime timeIn;
     private LocalTime timeOut;
     private String status;
+    
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String photo;
     private String location;
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+	public Timesheet(double d, double e) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public Timesheet() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public Long getId() {
 		return id;
@@ -62,6 +76,14 @@ public class Timesheet {
 		this.timeOut = timeOut;
 	}
 
+	public String getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+
 	public String getLocation() {
 		return location;
 	}
@@ -93,6 +115,5 @@ public class Timesheet {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-    
-    
+        
 }

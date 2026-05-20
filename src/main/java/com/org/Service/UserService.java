@@ -21,4 +21,8 @@ public interface UserService extends UserDetailsService{
 	
 	String getFirstName();
     String getLastName();
+
+    List<String> getAllActiveUsernames();
+
+    
 }

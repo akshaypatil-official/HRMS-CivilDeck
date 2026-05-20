@@ -1,6 +1,6 @@
 package com.org.Service;
 
-
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -19,5 +19,11 @@ public interface TimesheetService {
 	 
 
 		Page<Timesheet> getTimesheetsByUser(String email, Pageable pageable);
+
+		boolean hasUserLoggedTimeForDate(String username, LocalDate today);
+
+	
+		
+	
 	    
 }

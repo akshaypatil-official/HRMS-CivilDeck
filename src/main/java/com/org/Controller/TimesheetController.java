@@ -36,14 +36,6 @@ public class TimesheetController {
 	
 	@Autowired
 	private UserService userService;
-
-//    @GetMapping
-//    public String showTimesheetPage(Model model, Principal principal) {
-//        model.addAttribute("timesheets", timesheetService.getTimesheetsByUser(principal.getName()));
-//        model.addAttribute("timesheet", new Timesheet());
-//        return "Timesheet";
-//    }
-
 	
 	 @GetMapping
 	    public String showTimesheetPage(
