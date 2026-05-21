@@ -1,0 +1,86 @@
+@charset "UTF-8";
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar Container */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a252f; /* Deep corporate blue/gray */
+    padding: 15px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo Styling */
+.logo {
+    color: #f39c12; /* Vibrant construction amber/gold */
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Navigation Links Wrapper */
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Individual Link Styling */
+.nav-links li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Hover Effect for Regular Links */
+.nav-links li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #f39c12;
+}
+
+/* Special Styling for Logout Button */
+.nav-links li:last-child a {
+    background-color: #e74c3c; /* Accent red for logout */
+    color: #ffffff;
+}
+
+.nav-links li:last-child a:hover {
+    background-color: #c0392b;
+    color: #ffffff;
+}
+
+/* Responsive Design for Mobile Devices */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-links li a {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}
+

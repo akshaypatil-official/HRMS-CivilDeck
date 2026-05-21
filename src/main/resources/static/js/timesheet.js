@@ -106,54 +106,7 @@ window.onload = function() {
                 );
             }
         }
-  
-        
-        // 2. Capture photo and overlay the current date & time
-        function capturePhoto() {
-            if (!video.srcObject) {
-                alert("Please start the camera first.");
-                return;
-            }
-
-            let ctx = canvas.getContext('2d');
-            
-            // Match canvas dimensions to the live video feed
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Draw the current video frame onto the canvas
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Generate the current date and time string
-            let now = new Date();
-            let timestamp = now.toLocaleString(); // Format: MM/DD/YYYY, HH:MM:SS AM/PM
-            
-            // Set text styling for the overlay
-            let fontSize = Math.floor(canvas.height * 0.04); // Responsive font size (4% of image height)
-            ctx.font = `bold ${fontSize}px Arial`;
-            
-            // Draw text shadow background for high visibility on any image
-            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-            ctx.fillRect(15, canvas.height - fontSize - 25, ctx.measureText(timestamp).width + 20, fontSize + 15);
-            
-            // Draw the white timestamp text
-            ctx.fillStyle = "#ffffff";
-            ctx.textBaseline = "bottom";
-            ctx.fillText(timestamp, 25, canvas.height - 20);
-            
-            // Convert canvas data to Base64 URL string
-            let dataUrl = canvas.toDataURL('image/jpeg');
-            
-            // Update preview element and hidden input field for Thymeleaf form submission
-            preview.src = dataUrl;
-            preview.style.display = "block";
-            hiddenInput.value = dataUrl;
-        }
-    
-        
-        
-        
-        
+      
         function openPhotoModal(button) {
             // Get the image URL from the clicked button's data attribute
             const photoUrl = button.getAttribute('data-photo-url');
@@ -178,3 +131,4 @@ window.onload = function() {
                 modal.style.display = 'none';
             }
         }
+		

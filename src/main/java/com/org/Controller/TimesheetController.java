@@ -13,11 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 
 import com.org.Entity.Timesheet;
 import com.org.Excel.TimesheetExcelExporter;
@@ -28,9 +30,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 
 @Controller
+@CrossOrigin
 @RequestMapping("/timesheets")
 public class TimesheetController {
 
+	
 	@Autowired
     private TimesheetService timesheetService;
 	
@@ -113,7 +117,6 @@ public class TimesheetController {
         TimesheetExcelExporter exporter = new TimesheetExcelExporter(listTimesheets, currentUserName);
         exporter.export(response);
     }
-
 
 }
     

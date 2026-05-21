@@ -6,6 +6,7 @@
     <title>Timesheet Management</title>
     <link href="https://googleapis.com" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/timesheet.css}">
+    <link rel="stylesheet" th:href="@{/css/Header-Footer.css}">
      <script th:src="@{/js/timesheet.js}"></script>
     <script src="https://googleapis.com"></script>
 </head>
@@ -52,15 +53,15 @@
                     </div>
                 </div>
                 
-                <label class="form-label">Location</label>
+                <label class="form-label">Site Name</label>
                 <div style="display: flex; gap: 5px;">
                     <input type="text" id="userLocation" th:field="*{location}" class="form-control" placeholder="Office / Remote">
-                    <button type="button" class="btn-check" style="background: #6366f1; width: auto; padding: 0 10px; margin-bottom: 16px;" onclick="fetchCurrentLocation()">📍</button>
+                    <button type="button" class="btn-check" style="background: #6366f1; width: auto; padding: 0 10px; margin-bottom: 16px;">📍</button>
                 </div>
                 
-                <label class="form-label">Photo Verification</label>
+                <!-- <label class="form-label">Photo Verification</label>
 <div style="margin-bottom: 16px; text-align: center;">
-    <!-- Live Camera Feed -->
+    Live Camera Feed
     <video id="webcam" autoplay playsinline style="width: 100%; max-height: 200px; background: #000; border-radius: 4px;"></video>
     
     <div style="display: flex; gap: 10px; margin-top: 8px;">
@@ -68,15 +69,53 @@
         <button type="button" class="btn-check" style="background: #ef4444; flex: 1;" onclick="capturePhoto()">Capture Photo</button>
     </div>
 
-    <!-- Real-time Captured Photo Preview -->
+    Real-time Captured Photo Preview
     <div style="margin-top: 10px;">
         <canvas id="photoCanvas" style="display:none;"></canvas>
         <img id="photoPreview" src="" alt="Captured Preview" style="display: none; width: 100%; border-radius: 4px; border: 2px dashed #ccc;">
     </div>
 </div>
 
+Hidden input to store Base64 Image Data for Thymeleaf
+<input type="hidden" id="photoData" th:field="*{photo}"> -->
+        
+        
+      <label class="form-label" style="font-weight: bold; font-size: 1.1rem;">Photo Verification & Geotagging</label>
+
+<div style="margin-bottom: 16px; text-align: center; max-width: 500px; margin-left: auto; margin-right: auto; border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+    
+    <!-- Geolocation Status Displays -->
+    <div style="margin-bottom: 12px; text-align: left; font-size: 0.9rem;">
+        <button type="button" class="geo-btn" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 8px;">
+            📍 Step 1: Fetch Current Location
+        </button>
+        <div id="showDetails" style="color: #555; font-style: italic; margin-bottom: 4px; word-break: break-all;">Coordinates: Not fetched yet.</div>
+        <div class="formattedAddress" style="color: #059669; font-weight: bold; word-break: break-all;">Address: Location not available</div>
+    </div>
+
+    <!-- Live Camera Feed Container -->
+    <div style="margin-bottom: 10px; font-weight: 600; color: #333;">Live Camera Feed</div>
+    <video id="webcam" autoplay playsinline style="width: 100%; max-height: 250px; background: #000; border-radius: 6px; transform: scaleX(1);"></video>
+    
+    <!-- Camera Actions -->
+    <div style="display: flex; gap: 10px; margin-top: 10px; margin-bottom: 15px;">
+       <button type="button" id="startCameraBtn" disabled style="background: #10b981; color: white; border: none; padding: 10px; flex: 1; border-radius: 4px; font-weight: bold; opacity: 0.5; cursor: not-allowed;" onclick="startCamera()">📷 Start Camera</button>
+        <button type="button" style="background: #ef4444; color: white; border: none; padding: 10px; flex: 1; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="capturePhoto()">🎯 Capture & Geotag</button>
+    </div>
+
+    <!-- Real-time Captured Photo Preview -->
+    <div style="margin-top: 10px;">
+        <canvas id="photoCanvas" style="display:none;"></canvas>
+        <img id="photoPreview" src="" alt="Captured Preview" style="display: none; width: 100%; border-radius: 6px; border: 2px dashed #059669; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    </div>
+</div>
+
 <!-- Hidden input to store Base64 Image Data for Thymeleaf -->
 <input type="hidden" id="photoData" th:field="*{photo}">
+        
+        
+        
+        
         
                 <div id="liveDuration" style="margin-bottom: 15px; font-weight: 700; color: var(--primary);">
                     Session: <span id="currentSessionHrs">0.0</span> hrs
@@ -178,7 +217,7 @@
         </main>
     </div>
 </body>
-<script type="text/javascript">
+<!-- <script type="text/javascript">
 let video = document.getElementById('webcam');
 let canvas = document.getElementById('photoCanvas');
 let preview = document.getElementById('photoPreview');
@@ -194,6 +233,122 @@ function startCamera() {
             console.error("Error accessing camera: ", err);
             alert("Could not access webcam. Please check permissions.");
         });
+}
+
+</script> -->
+<script>
+
+const formattedAddress = document.querySelector(".formattedAddress");
+const showDetails = document.getElementById("showDetails");
+const webcam = document.getElementById("webcam");
+const canvas = document.getElementById("photoCanvas");
+const photoPreview = document.getElementById("photoPreview");
+const photoDataInput = document.getElementById("photoData");
+// Reference your camera start button
+const startCameraBtn = document.getElementById("startCameraBtn"); 
+
+// Global variables to store fetched data
+let currentFullAddress = "Location not available";
+let apiEndpoint = "https://api.opencagedata.com/geocode/v1/json"; 
+let apiKey = "a83f041117f24e74b2e235ba14f797f7";
+
+// 1. Geolocation Logic
+const getUserCurrentAddress = async (latitude, longitude) => {
+    let query = `${latitude},${longitude}`; 
+    let apiUrl = `${apiEndpoint}?key=${apiKey}&q=${query}&pretty=1`; 
+    try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        
+        if(data.results && data.results.length > 0) {
+            currentFullAddress = data.results[0].formatted;
+            formattedAddress.textContent = `Address: ${currentFullAddress}`;
+        } else {
+            currentFullAddress = `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
+            formattedAddress.textContent = `Address details unavailable. Using Coordinates.`;
+        }
+    } catch (error) {
+        console.error("Geocoding Error: ", error);
+        currentFullAddress = `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
+        formattedAddress.textContent = `Failed to resolve address. Using coordinates fallback.`;
+    } finally {
+        // ENABLE CAMERA BUTTON: Triggers instantly once location workflow is finalized
+        startCameraBtn.removeAttribute("disabled");
+        startCameraBtn.style.opacity = "1";
+        startCameraBtn.style.cursor = "pointer";
+    }
+};
+
+document.querySelector('.geo-btn').addEventListener('click', () => { 
+    if (navigator.geolocation) {
+        showDetails.textContent = "Fetching current GPS coordinates...";
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                showDetails.textContent = `Coordinates: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`; 
+                getUserCurrentAddress(latitude, longitude);
+            },
+            (error) => {
+                showDetails.textContent = `GPS Error: ${error.message}`; 
+                alert("Please enable location access to unlock the camera features.");
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    } else {
+        showDetails.textContent = "Geolocation is not supported by this browser.";
+    }
+});
+
+// 2. Camera Logic
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        webcam.srcObject = stream;
+    } catch (err) {
+        console.error("Error accessing camera: ", err);
+        alert("Could not access camera. Please verify camera hardware permissions.");
+    }
+}
+
+// 3. Capture Photo and Draw Text Overlay
+function capturePhoto() {
+    if (!webcam.srcObject || webcam.videoWidth === 0) {
+        alert("Please start the camera stream first and wait for initialization.");
+        return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    
+    canvas.width = webcam.videoWidth;
+    canvas.height = webcam.videoHeight;
+    
+    ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+    
+    const now = new Date();
+    const dateTimeString = now.toLocaleString(); 
+    
+    ctx.fillStyle = "rgba(0, 0, 0, 0.65)"; 
+    ctx.fillRect(0, canvas.height - 90, canvas.width, 90); 
+    
+    ctx.fillStyle = "#ffffff"; 
+    ctx.font = "bold 16px Arial, sans-serif";
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 4;
+    
+    ctx.fillText(`📅 Date/Time: ${dateTimeString}`, 20, canvas.height - 55);
+    
+    let displayAddress = currentFullAddress;
+    let maxTextWidth = canvas.width - 40;
+    if(ctx.measureText(`📍 Addr: ${displayAddress}`).width > maxTextWidth) {
+        displayAddress = currentFullAddress.substring(0, 55) + "...";
+    }
+    ctx.fillText(`📍 Addr: ${displayAddress}`, 20, canvas.height - 25);
+    
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    
+    photoPreview.src = dataUrl;
+    photoPreview.style.display = "block";
+    photoDataInput.value = dataUrl; 
 }
 
 </script>
