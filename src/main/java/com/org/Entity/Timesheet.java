@@ -24,13 +24,15 @@ public class Timesheet {
     private LocalDate date;
     private LocalTime timeIn;
     private LocalTime timeOut;
+    private LocalTime nightTimeIn;
+    private LocalTime nightTimeOut;
     private String status;
-    
+    @Column(name = "night_status")
+    private String nightStatus; 
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String photo;
     private String location;
-    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -76,6 +78,22 @@ public class Timesheet {
 		this.timeOut = timeOut;
 	}
 
+	public LocalTime getNightTimeIn() {
+		return nightTimeIn;
+	}
+
+	public void setNightTimeIn(LocalTime nightTimeIn) {
+		this.nightTimeIn = nightTimeIn;
+	}
+
+	public LocalTime getNightTimeOut() {
+		return nightTimeOut;
+	}
+
+	public void setNightTimeOut(LocalTime nightTimeOut) {
+		this.nightTimeOut = nightTimeOut;
+	}
+
 	public String getPhoto() {
 		return photo;
 	}
@@ -92,14 +110,6 @@ public class Timesheet {
 		this.location = location;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public User getUser() {
 		return user;
 	}
@@ -114,6 +124,14 @@ public class Timesheet {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getNightStatus() {
+		return nightStatus;
+	}
+
+	public void setNightStatus(String nightStatus) {
+		this.nightStatus = nightStatus;
 	}
         
 }

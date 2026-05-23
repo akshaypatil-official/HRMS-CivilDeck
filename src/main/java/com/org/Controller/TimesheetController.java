@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 import com.org.Entity.Timesheet;
+import com.org.Entity.User;
 import com.org.Excel.TimesheetExcelExporter;
 import com.org.Service.TimesheetService;
 import com.org.Service.UserService;
@@ -59,9 +60,10 @@ public class TimesheetController {
 	        
 	        // 3. Extract and pass ONLY the list of 10 items for the current page
 	        model.addAttribute("timesheets", timesheetPage.getContent());
-	        
+	       
 	        // 4. Pass empty object for your form binding
 	        model.addAttribute("timesheet", new Timesheet()); 
+	        
 	        
 	        return "Timesheet";
 	    }
@@ -71,7 +73,6 @@ public class TimesheetController {
         if (principal == null) {
             return "redirect:/login"; // Redirect if session is lost
         }
-
         try {
             timesheetService.saveTimesheet(timesheet, principal.getName());
             return "redirect:/timesheets?success";
@@ -92,31 +93,68 @@ public class TimesheetController {
       
     
     @GetMapping("/export")
-    public void exportTimesheet(HttpServletResponse response, Principal principal) throws IOException {
+    public void exportTimesheet(
+        @RequestParam(name = "month", required = false) String month,
+        HttpServletResponse response, 
+        Principal principal
+    ) throws IOException {
+        
+        // 1. Force login if session expired
         if (principal == null) {
             response.sendRedirect("/login");
             return;
         }
+        
+        // 2. Validate input format (expects YYYY-MM)
+        if (month == null || month.trim().isEmpty() || !month.matches("^\\d{4}-\\d{2}$")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid date format. Use YYYY-MM.");
+            return;
+        }
 
-        // 1. Fetch data from service
-        List<Timesheet> listTimesheets = timesheetService.findAll(); 
+        // 3. Parse data securely
+        String[] parts = month.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int monthValue = Integer.parseInt(parts[1]);
 
-        // 2. Fetch logged-in user names from userService
-        String firstName = userService.getFirstName();
-        String lastName = userService.getLastName();
-        String currentUserName = firstName + " " + lastName;
+        // 4. Get the logged-in Username/Email from principal
+        String loggedInUserEmail = principal.getName(); 
 
-        System.out.println("Exporting for user: " + currentUserName);
-        String safeFileName = currentUserName.replaceAll("[^a-zA-Z0-9.-]", "_");
-        String finalFileName = "Timesheet_Report_" + safeFileName + ".xlsx";
-        // 3. Set response headers
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition",  "attachment; filename=\"" + finalFileName + "\"");
+        // 5. FETCH LOGIN USER ID: Use the email to get the actual User object from your database
+        User loggedInUser = userService.getUserByEmail(loggedInUserEmail); // Or findByUsername depending on your setup
+        
+        if (loggedInUser == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User details not found.");
+            return;
+        }
+        
+        Long user_Id = loggedInUser.getUser_id(); // This extracts the actual logged-in user's ID dynamically
 
-        // 4. Pass list and dynamic name to the Exporter
-        TimesheetExcelExporter exporter = new TimesheetExcelExporter(listTimesheets, currentUserName);
+        // 6. Fetch ONLY filtered rows from the database
+        List<Timesheet> listTimesheets = timesheetService.findByUserAndMonth(loggedInUserEmail, year, monthValue); 
+
+        // 7. Fetch details using the dynamically retrieved user_Id
+        String companyName = userService.getCompanyName(user_Id); 
+        if (companyName == null) {
+            companyName = "Default Company";
+        }
+
+        String firstName = loggedInUser.getFirstName(); // Safer to pull directly from the retrieved user object
+        String lastName = loggedInUser.getLastName();
+        
+        if (firstName == null) firstName = "User";
+        if (lastName == null) lastName = "";
+
+        String loggedInUserName = (firstName + " " + lastName).trim();
+        String safeFileName = loggedInUserName.replaceAll("[^a-zA-Z0-9.-]", "_");
+        String finalFileName = "Timesheet_" + safeFileName + "_" + month + ".xlsx";
+        
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + finalFileName + "\"");
+
+        TimesheetExcelExporter exporter = new TimesheetExcelExporter(listTimesheets,companyName, loggedInUserName, month);
         exporter.export(response);
     }
+
 
 }
     

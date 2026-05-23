@@ -24,4 +24,12 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	    List<Object[]> findTimesheetData(@Param("firstName") String firstName, 
 	                                     @Param("lastName") String lastName);
 
+	    
+	    @Query(value = "SELECT c.name FROM user u " +
+                "JOIN companies c ON u.company_id = c.id " +
+                "WHERE u.user_id = :user_id", nativeQuery = true)
+ String findCompanyNameByUser_Id(@Param("user_id") Long user_Id);
+
+	
+
 }

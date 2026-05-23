@@ -185,16 +185,9 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-    
-    
-	/*
-	 * @Override  
-	 * 
-	 * @Transactional public List<User> findByName(String firstName, String
-	 * lastName) { String fName = (firstName != null && !firstName.isEmpty()) ?
-	 * firstName : null; String lName = (lastName != null && !lastName.isEmpty()) ?
-	 * lastName : null;
-	 *   
-	 * return userRepository.searchByNamesProc(fName, lName); }
-	 */
+	@Override
+	public String getCompanyName(Long user_Id) {
+	    // Fetches the company name via table join using the user's ID
+	    return userRepository.findCompanyNameByUser_Id(user_Id); 
+	}
 }	

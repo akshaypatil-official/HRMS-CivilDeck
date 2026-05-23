@@ -21,11 +21,17 @@ public class TimesheetExcelExporter {
     private XSSFWorkbook workbook;
     private XSSFSheet sheet;
     private List<Timesheet> listTimesheets;
+    private String companyName;
     private String loggedInUserName;
+    private String selectedMonth;
+   
 
-    public TimesheetExcelExporter(List<Timesheet> listTimesheets,String loggedInUserName) {
+    public TimesheetExcelExporter(List<Timesheet> listTimesheets,String companyName, String loggedInUserName, String month) {
         this.listTimesheets = listTimesheets;
-        this.loggedInUserName = loggedInUserName;
+        this.companyName= companyName;
+        this.loggedInUserName = loggedInUserName;        
+        this.selectedMonth = month;
+        
         workbook = new XSSFWorkbook();
     }
 
@@ -39,26 +45,27 @@ public class TimesheetExcelExporter {
 
         // 2. Header Section (Company Name)
         Row titleRow = sheet.createRow(0);
-        createCell(titleRow, 0, "GAWALI ENGINEERING AND COMPANY", titleStyle);
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
+        createCell(titleRow, 0, companyName , titleStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6));
 
         Row nameRow = sheet.createRow(1);
         createCell(nameRow, 0, "NAME : " + loggedInUserName, headerStyle);
         sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 5));
         
-         String currentMonthYear = LocalDate.now()
-        	    .format(DateTimeFormatter.ofPattern("MMM yyyy"))
-        	    .toUpperCase();
+        YearMonth yearMonth = YearMonth.parse(selectedMonth); 
+        String formattedMonthYear = yearMonth
+                .format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH))
+                .toUpperCase();
 
         	// 2. Create the row and cell with the dynamic title
         	Row reportTitle = sheet.createRow(2);
-        	createCell(reportTitle, 0, "ATTENDANCE FOR " + currentMonthYear, headerStyle);
+        	createCell(reportTitle, 0, "ATTENDANCE FOR " + formattedMonthYear, headerStyle);
 
         	// 3. Merge the region as before
         	sheet.addMergedRegion(new CellRangeAddress(2, 2, 0, 5));
         // 3. Table Headers
         Row tableHeader = sheet.createRow(4);
-        String[] columns = {"DAYS", "DATE", "IN TIME", "OUT TIME", "DURATION", "REMARK"};
+        String[] columns = {"DAYS", "DATE", "IN TIME", "OUT TIME", "DURATION", "REMARK","NIGHT STATUS" };
         for (int i = 0; i < columns.length; i++) {
             createCell(tableHeader, i, columns[i], headerStyle);
             sheet.setColumnWidth(i, 4000);
@@ -92,6 +99,7 @@ public class TimesheetExcelExporter {
             
             createCell(row, 4, dur, bodyStyle);
             createCell(row, 5, ts.getStatus(), bodyStyle);
+            createCell(row,6 , ts.getNightStatus(), bodyStyle);
         }
 
 //        int footerStart = rowCount + 2;
@@ -112,7 +120,7 @@ public class TimesheetExcelExporter {
 //    }
 
         
-        int totalAbsent = 0, totalAttended = 0, totalFullNight = 0;
+        int totalAbsent = 0, totalAttended = 0, totalHalfDay = 0, totalFullNight = 0;
         int totalHalfNight = 0, totalSunday = 0, totalHoliday = 0;
 
         // 2. Loop through your data rows (assuming rows 1 to rowCount contain data)
@@ -129,10 +137,17 @@ public class TimesheetExcelExporter {
                 switch (status) {
                     case "PRESENT": case "P": totalAttended++; break;
                     case "ABSENT":  case "A": totalAbsent++; break;
-                    case "FULL NIGHT":        totalFullNight++; break;
-                    case "HALF NIGHT":        totalHalfNight++; break;
+                    case "HALF DAY":          totalHalfDay++; break;
                     case "SUNDAY":            totalSunday++; break;
                     case "HOLIDAY":           totalHoliday++; break;
+                }
+            }
+            Cell nightCell = dataRow.getCell(6);
+            if (nightCell != null) {
+                String nightStatus = nightCell.getStringCellValue().toUpperCase().trim();
+                switch (nightStatus) {
+                    case "FULL NIGHT": totalFullNight++; break; // Do not add to totalAttended here
+                    case "HALF NIGHT": totalHalfNight++; break; // Do not add to totalAttended here
                 }
             }
         }
@@ -141,9 +156,11 @@ public class TimesheetExcelExporter {
         int footerStart = rowCount + 2;
         int daysInMonth = java.time.YearMonth.now().lengthOfMonth();
 
-        String[] footerLabels = {"TOTAL DAYS", "ABSENT", "ATTENDED", "FULL NIGHT", "HALF NIGHT", "SUNDAY", "HOLIDAY", "TOTAL ATTENDANCE DAYS"};
-        Object[] footerValues = {daysInMonth, totalAbsent, totalAttended, totalFullNight, totalHalfNight, totalSunday, totalHoliday, (totalAttended + totalFullNight + totalHalfNight)};
+        // Formula calculates weights correctly: Full Night = 1.0, Half Night = 0.5, Half Day = 0.5
+        double totalAttendanceDays = totalAttended + (totalFullNight * 1.0) + (totalHalfNight * 0.5) + (totalHalfDay * 0.5);
 
+        String[] footerLabels = {"TOTAL DAYS", "ABSENT", "ATTENDED", "HALF DAY", "FULL NIGHT", "HALF NIGHT", "SUNDAY", "HOLIDAY", "TOTAL ATTENDANCE DAYS"};
+        Object[] footerValues = {daysInMonth, totalAbsent, totalAttended, totalHalfDay, totalFullNight, totalHalfNight, totalSunday, totalHoliday, totalAttendanceDays};
         // 4. Generate Footer Rows
         for (int i = 0; i < footerLabels.length; i++) {
             Row footerRow = sheet.createRow(footerStart + i);

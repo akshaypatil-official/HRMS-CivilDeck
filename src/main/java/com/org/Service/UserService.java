@@ -22,7 +22,9 @@ public interface UserService extends UserDetailsService{
 	String getFirstName();
     String getLastName();
 
-    List<String> getAllActiveUsernames();
+	List<String> getAllActiveUsernames();
+
+	String getCompanyName(Long user_Id);
 
     
 }

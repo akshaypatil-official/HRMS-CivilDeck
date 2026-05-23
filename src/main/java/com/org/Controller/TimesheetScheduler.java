@@ -38,7 +38,7 @@ public class TimesheetScheduler {
 	                absentRecord.setStatus("Absent");
 	                absentRecord.setTimeIn(LocalTime.parse("00:00"));  
 	                absentRecord.setTimeOut(LocalTime.parse("00:00"));
-	                absentRecord.setDescription("Absent");
+	                
 	                
 	                timesheetService.saveTimesheet(absentRecord, username);
 	            }

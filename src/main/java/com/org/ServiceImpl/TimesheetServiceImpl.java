@@ -2,6 +2,7 @@ package com.org.ServiceImpl;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ public class TimesheetServiceImpl implements TimesheetService{
 	                absentRecord.setStatus("Absent");
 	                absentRecord.setTimeIn(LocalTime.parse("00:00"));  
 	                absentRecord.setTimeOut(LocalTime.parse("00:00"));
-	                absentRecord.setDescription("Absent");
+	                
 	                
 	                timesheetRepo.save(absentRecord);
 	            }
@@ -151,14 +152,28 @@ public class TimesheetServiceImpl implements TimesheetService{
 
 	        // 3. EVENING LOGIC: Update timeOut if record exists for today
 	        if (!existingRows.isEmpty()) {
-	            Timesheet current = existingRows.get(0);
+	            Timesheet existingRecord = existingRows.get(0);
 
 	            if (timesheet.getTimeOut() != null) {
-	                current.setTimeOut(timesheet.getTimeOut());
+	            	existingRecord.setTimeOut(timesheet.getTimeOut());
 	                // Optional: If you track status or hours, you can update them from 'Present' here
 	            }
 	            
-	            timesheetRepo.save(current);
+//	            timesheetRepo.save(current);
+	            if (timesheet.getNightTimeOut() != null) {
+	                existingRecord.setNightTimeOut(timesheet.getNightTimeOut());
+	                existingRecord.setNightStatus(timesheet.getNightStatus()); // Saves 'Full Night' or 'Half Night'
+	                existingRecord.setStatus(timesheet.getStatus());           // Saves 'DayNight'
+	            }
+
+	            // Handle case where Night In is stamped later in the day on an existing record
+	            if (timesheet.getNightTimeIn() != null && existingRecord.getNightTimeIn() == null) {
+	                existingRecord.setNightTimeIn(timesheet.getNightTimeIn());
+	                existingRecord.setNightStatus(timesheet.getNightStatus());
+	                existingRecord.setStatus(timesheet.getStatus());
+	            }
+	            
+	            timesheetRepo.save(existingRecord);
 	            
 	        } else {
 	            // 4. MORNING LOGIC: Create the primary entry for today
@@ -166,8 +181,18 @@ public class TimesheetServiceImpl implements TimesheetService{
 	            timesheet.setDate(today);
 	            
 	            // Ensure today's fresh morning record defaults to "Present" or active status
-	            if (timesheet.getStatus() == null) {
-	                timesheet.setStatus("Present"); 
+	            if ("DayNight".equals(timesheet.getStatus())) {
+	                // Starting a night shift as a fresh record
+	                timesheet.setTimeIn(null);
+	                timesheet.setTimeOut(null);
+	            } else {
+	                // Starting a regular morning shift or default
+	                if (timesheet.getStatus() == null) {
+	                    timesheet.setStatus("Present");
+	                }
+	                timesheet.setNightStatus(null);
+	                timesheet.setNightTimeIn(null);
+	                timesheet.setNightTimeOut(null);
 	            }
 	            
 	            timesheetRepo.save(timesheet);
@@ -193,5 +218,14 @@ public class TimesheetServiceImpl implements TimesheetService{
 		    // 3. Query the repository using the User object and the date
 		    return timesheetRepo.existsByUserAndDate(user, today);
 		}
+
+		@Override
+	    public List<Timesheet> findByUserAndMonth(String userId, int year, int month) {
+	        // Logs the parameters to the console for easy debugging
+	        System.out.println("Service Layer -> Fetching data for User: " + userId + ", Year: " + year + ", Month: " + month);
+	        
+	        // Sends the parameters straight to the database query
+	        return timesheetRepo.findByUserAndMonth(userId, year, month);
+	    }
 	   
 }

@@ -21,7 +21,9 @@ public interface TimesheetService {
 		Page<Timesheet> getTimesheetsByUser(String email, Pageable pageable);
 
 		boolean hasUserLoggedTimeForDate(String username, LocalDate today);
+		
 
+		List<Timesheet> findByUserAndMonth(String userId, int year, int month);
 	
 		
 	

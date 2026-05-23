@@ -10,6 +10,13 @@
      <script th:src="@{/js/timesheet.js}"></script>
     <script src="https://googleapis.com"></script>
 </head>
+<style>
+.time-btn-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+</style>
 <body>
    <header class="navbar">
 		<div class="logo">CIVIL DECK INRAPROJECTS</div>
@@ -31,27 +38,45 @@
             <h3>Time Entry</h3>
             <form th:action="@{/timesheets/save}" th:object="${timesheet}" method="post">
                 <label class="form-label">Date</label>
-                <input type="date" id="todayDate" th:field="*{date}" class="form-control" readonly>
+<input type="date" id="todayDate" th:field="*{date}" class="form-control">
                 
-                <label class="form-label">Status</label>
-                <select class="form-control" th:field="*{status}" required>
-                    <option value="Present">Present</option>
-                    <option value="Absent">Absent</option>
-                    <option value="Holiday">Holiday</option>
-                </select>
-                
-                <div class="time-btn-group">
-                    <div class="time-col">
-                        <label class="form-label">In</label>
-                        <input type="time" id="timeIn" th:field="*{timeIn}" class="form-control" readonly>
-                        <button type="button" class="btn-check btn-checkin" onclick="setCurrentTime('timeIn')">In</button>
-                    </div>
-                    <div class="time-col">
-                        <label class="form-label">Out</label>
-                        <input type="time" id="timeOut" th:field="*{timeOut}" class="form-control" readonly>
-                        <button type="button" class="btn-check btn-checkout" onclick="setCurrentTime('timeOut')">Out</button>
-                    </div>
-                </div>
+          <label class="form-label">Status</label>
+<select id="statusSelect" class="form-control" th:field="*{status}" onchange="handleStatusChange()" required>
+    <option value="Present">Present</option>
+    <option value="DayNight">Night</option>
+    <option value="Absent">Absent</option>
+    <option value="Holiday">Holiday</option>
+</select>
+
+<input type="hidden" id="nightStatusInput" th:field="*{nightStatus}">
+
+<!-- Morning / Day Shift Section (Added id="morningTimeGroup") -->
+<div id="morningTimeGroup" class="time-btn-group">
+    <div class="time-col">
+        <label class="form-label">In</label>
+        <input type="time" id="timeIn" th:field="*{timeIn}" class="form-control" readonly>
+        <button type="button" id="timeInBtn" class="btn-check btn-checkin" onclick="setCurrentTime('timeIn')">In</button>
+    </div>
+    <div class="time-col">
+        <label class="form-label">Out</label>
+        <input type="time" id="timeOut" th:field="*{timeOut}" class="form-control" readonly>
+        <button type="button" id="timeOutBtn" class="btn-check btn-checkout" onclick="setCurrentTime('timeOut')">Out</button>
+    </div>
+</div>
+
+<!-- Night Shift Section -->
+<div id="nightTimeGroup" class="time-btn-group" style="margin-top: 15px; display: none;">
+    <div class="time-col">
+        <label class="form-label">Night In</label>
+        <input type="time" id="nightTimeIn" th:field="*{nightTimeIn}" class="form-control" readonly>
+        <button type="button" id="btnNightIn" class="btn-check btn-checkin" onclick="setCurrentTime('nightTimeIn')">Night In</button>
+    </div>
+    <div class="time-col">
+        <label class="form-label">Night Out</label>
+        <input type="time" id="nightTimeOut" th:field="*{nightTimeOut}" class="form-control" readonly>
+        <button type="button" id="btnNightOut" class="btn-check btn-checkout" onclick="setCurrentTime('nightTimeOut')">Night Out</button>
+    </div>
+</div>
                 
                 <label class="form-label">Site Name</label>
                 <div style="display: flex; gap: 5px;">
@@ -113,16 +138,6 @@ Hidden input to store Base64 Image Data for Thymeleaf
 <!-- Hidden input to store Base64 Image Data for Thymeleaf -->
 <input type="hidden" id="photoData" th:field="*{photo}">
         
-        
-        
-        
-        
-                <div id="liveDuration" style="margin-bottom: 15px; font-weight: 700; color: var(--primary);">
-                    Session: <span id="currentSessionHrs">0.0</span> hrs
-                </div>
-                
-                <label class="form-label">Work Description</label>
-                <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
                 
                 <button type="submit" class="btn-submit">Submit Timesheet</button>
             </form>
@@ -130,12 +145,23 @@ Hidden input to store Base64 Image Data for Thymeleaf
 
         <!-- RIGHT: TABLE -->
         <main class="table-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border);">
-                <h3 style="margin:0">History Logs</h3>
-                <a th:href="@{/timesheets/export}" class="btn btn-success" style="text-decoration: none; padding: 8px 12px; background: var(--success); color: white; border-radius: 6px; font-weight: 600; font-size: 0.85rem;">
-                    Download Excel
-                </a>
-            </div>
+           <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border);">
+    <h3 style="margin:0">History Logs</h3>
+    
+    <!-- Month Selection Form -->
+    <form th:action="@{/timesheets/export}" method="get" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+        <input type="month" 
+               name="month" 
+               required 
+               style="padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+        
+        <button type="submit" 
+                class="btn btn-success" 
+                style="padding: 8px 12px; background: var(--success); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+            Download Excel
+        </button>
+    </form>
+</div>
             
             <table class="table" id="historyTable">
                 <thead>
@@ -143,7 +169,6 @@ Hidden input to store Base64 Image Data for Thymeleaf
                         <th>Date</th>
                         <th>Time</th>
                         <th>Location</th>
-                        <th>Description</th>
                         <th>Status</th>
                         <th>Photo</th>
                         <th>Duration</th>
@@ -152,12 +177,16 @@ Hidden input to store Base64 Image Data for Thymeleaf
                 <tbody>
                     <tr th:each="ts : ${timesheets}">
                         <td th:text="${#temporals.format(ts.date, 'dd MMM yyyy')}">20 Oct 2023</td>
-                        <td class="time-text">
-                            <span class="t-in" th:text="${#temporals.format(ts.timeIn, 'hh:mm a')}">09:00 AM</span> - 
-                            <span class="t-out" th:text="${#temporals.format(ts.timeOut, 'hh:mm a')}">05:30 PM</span>
-                        </td>
+                       <td class="time-text">
+    <!-- If timeIn is 00:00, show 'Absent'. Otherwise show the formatted time -->
+    <span class="t-in" th:text="${#temporals.format(ts.timeIn, 'HH:mm') == '00:00'} ? '00:00 - 00:00' : ${#temporals.format(ts.timeIn, 'hh:mm a')}">09:00 AM</span>
+    
+    <!-- Only show the hyphen and Out Time if the employee was present -->
+    <th:block th:if="${#temporals.format(ts.timeIn, 'HH:mm') != '00:00'}">
+        - <span class="t-out" th:text="${#temporals.format(ts.timeOut, 'hh:mm a')}">05:30 PM</span>
+    </th:block>
+</td>
                         <td th:text="${ts.location}">office</td>
-                        <td th:text="${ts.description}">Project Alpha</td>
                         <td th:text="${ts.status}">Present</td>
                         <td>
     <!-- Hidden image used for reference if needed -->
@@ -217,25 +246,6 @@ Hidden input to store Base64 Image Data for Thymeleaf
         </main>
     </div>
 </body>
-<!-- <script type="text/javascript">
-let video = document.getElementById('webcam');
-let canvas = document.getElementById('photoCanvas');
-let preview = document.getElementById('photoPreview');
-let hiddenInput = document.getElementById('photoData');
-
-// 1. Start the camera stream
-function startCamera() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
-        .then(stream => {
-            video.srcObject = stream;
-        })
-        .catch(err => {
-            console.error("Error accessing camera: ", err);
-            alert("Could not access webcam. Please check permissions.");
-        });
-}
-
-</script> -->
 <script>
 
 const formattedAddress = document.querySelector(".formattedAddress");
@@ -244,7 +254,6 @@ const webcam = document.getElementById("webcam");
 const canvas = document.getElementById("photoCanvas");
 const photoPreview = document.getElementById("photoPreview");
 const photoDataInput = document.getElementById("photoData");
-// Reference your camera start button
 const startCameraBtn = document.getElementById("startCameraBtn"); 
 
 // Global variables to store fetched data
@@ -262,6 +271,7 @@ const getUserCurrentAddress = async (latitude, longitude) => {
         
         if(data.results && data.results.length > 0) {
             currentFullAddress = data.results[0].formatted;
+            console.log(currentFullAddress);
             formattedAddress.textContent = `Address: ${currentFullAddress}`;
         } else {
             currentFullAddress = `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
@@ -272,7 +282,6 @@ const getUserCurrentAddress = async (latitude, longitude) => {
         currentFullAddress = `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
         formattedAddress.textContent = `Failed to resolve address. Using coordinates fallback.`;
     } finally {
-        // ENABLE CAMERA BUTTON: Triggers instantly once location workflow is finalized
         startCameraBtn.removeAttribute("disabled");
         startCameraBtn.style.opacity = "1";
         startCameraBtn.style.cursor = "pointer";
@@ -318,7 +327,6 @@ function capturePhoto() {
     }
 
     const ctx = canvas.getContext("2d");
-    
     canvas.width = webcam.videoWidth;
     canvas.height = webcam.videoHeight;
     
@@ -345,11 +353,13 @@ function capturePhoto() {
     ctx.fillText(`📍 Addr: ${displayAddress}`, 20, canvas.height - 25);
     
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-    
     photoPreview.src = dataUrl;
     photoPreview.style.display = "block";
     photoDataInput.value = dataUrl; 
 }
+</script>
+<script>
 
 </script>
+
 </html>
