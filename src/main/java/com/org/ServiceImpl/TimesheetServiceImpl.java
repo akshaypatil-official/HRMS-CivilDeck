@@ -156,6 +156,7 @@ public class TimesheetServiceImpl implements TimesheetService{
 
 	            if (timesheet.getTimeOut() != null) {
 	            	existingRecord.setTimeOut(timesheet.getTimeOut());
+	            	existingRecord.setOutPhoto(timesheet.getOutPhoto());
 	                // Optional: If you track status or hours, you can update them from 'Present' here
 	            }
 	            
@@ -227,5 +228,38 @@ public class TimesheetServiceImpl implements TimesheetService{
 	        // Sends the parameters straight to the database query
 	        return timesheetRepo.findByUserAndMonth(userId, year, month);
 	    }
+
+		@Override
+		@Transactional // Ensures the update operation runs safely inside a database transaction
+		public void updateTimesheet(Timesheet timesheet) {
+		    // 1. Verify that the timesheet exists in the database first
+		    Timesheet existingTimesheet = timesheetRepo.findById(timesheet.getId())
+		            .orElseThrow(() -> new IllegalArgumentException("Timesheet not found with ID: " + timesheet.getId()));
+		    
+		    // 2. Map the updated values from the form to the database entity
+		    // Replace these field names with the exact field names in your Timesheet class
+		    existingTimesheet.setDate(timesheet.getDate());
+		    existingTimesheet.setLocation(timesheet.getLocation());
+		    existingTimesheet.setStatus(timesheet.getStatus());
+		    existingTimesheet.setTimeIn(timesheet.getTimeIn());
+		    existingTimesheet.setTimeOut(timesheet.getTimeOut());
+		    existingTimesheet.setNightTimeIn(timesheet.getNightTimeIn());
+		    existingTimesheet.setNightTimeOut(timesheet.getNightTimeOut());
+		    existingTimesheet.setNightStatus(timesheet.getNightStatus());
+		    
+		    // If your Timesheet has a relationship with a User, retain it so it doesn't become null
+		    if (timesheet.getUser() != null) {
+		        existingTimesheet.setUser(timesheet.getUser());
+		    }
+
+		    // 3. Save the modified entity back to the database
+		    timesheetRepo.save(existingTimesheet);
+		}
+
+		@Override
+		public Timesheet getTimesheetById(Long id) {
+		    // Finds the timesheet by ID, or returns null if it does not exist
+		    return timesheetRepo.findById(id).orElse(null);
+		}
 	   
 }

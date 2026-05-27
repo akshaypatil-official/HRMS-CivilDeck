@@ -170,8 +170,7 @@ function setCurrentTime(fieldId) {
             }
         }
 		
-		
-		
+	
 		function handleStatusChange() {
 		    const statusSelect = document.getElementById('statusSelect');
 		    if (!statusSelect) return;
@@ -192,39 +191,83 @@ function setCurrentTime(fieldId) {
 		    const nightOutBtn = document.getElementById('btnNightOut');
 		    const hiddenNightStatus = document.getElementById('nightStatusInput');
 
+		    // 1. Get the Date Input element securely
+		    const dateInput = document.getElementById('todayDate'); 
+		    
 		    const now = new Date();
-		    const currentHour = now.getHours();
+		    
+		    // Create a local Date Object for real-world TODAY at midnight
+		    const currentTodayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+		    let selectedDateObject = null;
+		    let isTodaySelected = false;
+
+		    // 2. Format-Agnostic extraction engine with integrated live console logs
+		    if (dateInput && dateInput.value) {
+		        const rawDateString = dateInput.value; 
+		        console.log("Raw Selected Date String from Input: " + rawDateString);
+
+		        const parts = rawDateString.split('-'); // Splits standard HTML5 string "YYYY-MM-DD"
+		        if (parts.length === 3) {
+		            const year = parseInt(parts[0], 10);
+		            const month = parseInt(parts[1], 10) - 1; // JS months run 0-11 index mapping
+		            const day = parseInt(parts[2], 10);
+		            
+		            // Generate clean native instance representing selected date
+		            selectedDateObject = new Date(year, month, day);
+		        }
+		    } else {
+		        console.log("No date is currently selected in the input box.");
+		    }
+
+		    // 3. Compare timestamps and print match results to console
+		    if (selectedDateObject && !isNaN(selectedDateObject.getTime())) {
+		        isTodaySelected = (selectedDateObject.getTime() === currentTodayDate.getTime());
+		        
+		        console.log("Parsed Local Date Object: " + selectedDateObject.toString());
+		        console.log("Extracted Day Number: " + selectedDateObject.getDate());
+		        console.log("Is Selection Active Today?: " + isTodaySelected);
+		    } else {
+		        isTodaySelected = true; // Fallback default state
+		        console.log("Fallback Default Executed: True today matches.");
+		    }
+
+		    // 4. Run conditional interface layout rules
 		    if (status === 'DayNight') {
-		        // Validation: If it is before 6:00 PM (18:00) and after 4:00 AM
-		        if (currentHour < 18 && currentHour >= 4) {
-		            alert("Night shift actions are only allowed after 06:00 PM.");
-		            statusSelect.value = 'Present'; // Revert selection back to Present
-		            handleStatusChange(); // Re-run to fix UI states
-		            return;
+		        // Enforce time-of-day lock ONLY if the user has selected TODAY on the calendar
+		        if (isTodaySelected) {
+		            const currentHour = now.getHours();
+		            // Block shift actions if it is between 7:00 AM and 6:00 PM today
+		            if (currentHour >= 7 && currentHour < 18) {
+		                alert("Night shift actions are only allowed after 06:00 PM.");
+		                statusSelect.value = 'Present'; // Revert back to daytime presentation
+		                
+		                if (morningGroup) morningGroup.style.display = 'flex';
+		                if (nightGroup) nightGroup.style.display = 'none';
+		                return;
+		            }
 		        }
 
+		        // Past selected dates (like yesterday the 24th) completely skip validation rules and unlock everything
 		        if (morningGroup) morningGroup.style.display = 'none';
 		        if (timeInBtn) timeInBtn.disabled = true;
 		        if (timeOutBtn) timeOutBtn.disabled = true;
-		        if (timeInField) timeInField.value = '';
-		        if (timeOutField) timeOutField.value = '';
 
 		        if (nightGroup) nightGroup.style.display = 'flex';
-		        if (nightInBtn) nightInBtn.disabled = false;
-		        if (nightOutBtn) nightOutBtn.disabled = false;
+		        
+		        if (nightInField) { nightInField.disabled = false; nightInField.removeAttribute('disabled'); }
+		        if (nightOutField) { nightOutField.disabled = false; nightOutField.removeAttribute('disabled'); }
+		        if (nightInBtn) { nightInBtn.disabled = false; nightInBtn.removeAttribute('disabled'); }
+		        if (nightOutBtn) { nightOutBtn.disabled = false; nightOutBtn.removeAttribute('disabled'); }
 		    } 
 		    else if (status === 'Present') {
 		        if (morningGroup) morningGroup.style.display = 'flex';
-		        if (timeInBtn) timeInBtn.disabled = false;
-		        if (timeOutBtn) timeOutBtn.disabled = false;
+		        if (timeInBtn) { timeInBtn.disabled = false; timeInBtn.removeAttribute('disabled'); }
+		        if (timeOutBtn) { timeOutBtn.disabled = false; timeOutBtn.removeAttribute('disabled'); }
 
 		        if (nightGroup) nightGroup.style.display = 'none';
 		        if (nightInBtn) nightInBtn.disabled = true;
 		        if (nightOutBtn) nightOutBtn.disabled = true;
-		        if (nightInField) nightInField.value = '';
-		        if (nightOutField) nightOutField.value = '';
-		        if (hiddenNightStatus) hiddenNightStatus.value = ''; 
 		    } 
 		    else if (status === 'Absent' || status === 'Holiday') {
 		        if (morningGroup) morningGroup.style.display = 'none';
@@ -234,31 +277,10 @@ function setCurrentTime(fieldId) {
 		        if (timeOutBtn) timeOutBtn.disabled = true;
 		        if (nightInBtn) nightInBtn.disabled = true;
 		        if (nightOutBtn) nightOutBtn.disabled = true;
-		        
-		        if (timeInField) timeInField.value = '';
-		        if (timeOutField) timeOutField.value = '';
-		        if (nightInField) nightInField.value = '';
-		        if (nightOutField) nightOutField.value = '';
-		        if (hiddenNightStatus) hiddenNightStatus.value = ''; 
 		    }
 		}
 
-		function checkTimeAndSetDefaultStatus() {
-		    const statusSelect = document.getElementById('statusSelect');
-		    if (!statusSelect) return;
-
-		    const now = new Date();
-		    const currentHour = now.getHours();
-
-		    if (currentHour >= 18 || currentHour < 4) {
-		        statusSelect.value = 'DayNight';
-		    } else {
-		        statusSelect.value = 'Present'; 
-		    }
-		    
-		    handleStatusChange();
-		}
-
+		// 5. Action Trigger: Timestamps values into target inputs on click events
 		function setCurrentTime(inputId) {
 		    const now = new Date();
 		    const hours = String(now.getHours()).padStart(2, '0');
@@ -270,68 +292,63 @@ function setCurrentTime(fieldId) {
 		        inputField.value = timeString;
 		    }
 
-		    // NEW: Disable the button that was just clicked
-		    if (inputId === 'timeIn') {
-		        const timeInBtn = document.getElementById('timeInBtn');
-		        if (timeInBtn) timeInBtn.disabled = true;
-
-		        const btnNightIn = document.getElementById('btnNightIn');
-		        if (btnNightIn) btnNightIn.disabled = true;
+		    // 1. Handle Check-In Button Disabling States (Day or Night)
+		    if (inputId === 'timeIn' || inputId === 'nightTimeIn') {
+		        const targetBtn = document.getElementById(inputId === 'timeIn' ? 'timeInBtn' : 'btnNightIn');
+		        if (targetBtn) targetBtn.disabled = true;
 		    }
 		    
-		    // NEW: Disable the night In button when night time is filled
-		    if (inputId === 'nightTimeIn') {
-		        const btnNightIn = document.getElementById('btnNightIn');
-		        if (btnNightIn) btnNightIn.disabled = true;
-		    }
-
+		    // 2. FIXED: Handle Check-Out Button Disabling and Calculation States for Night Out
 		    if (inputId === 'nightTimeOut') {
+		        // Lock the Night Out button to prevent double-stamping entries
+		        const targetBtn = document.getElementById('btnNightOut');
+		        if (targetBtn) targetBtn.disabled = true;
+		        
+		        // Execute the dynamic shift-tier status evaluation calculator engine
 		        calculateNightStatus(hours, minutes);
+		    }
+		    
+		    // 3. FIXED: Trigger global session tracking duration counters to update state vectors
+		    if (typeof calculateFormDuration === "function") {
+		        calculateFormDuration();
 		    }
 		}
 
-
+		// 6. Status Engine: Labels night configuration types dynamically based on out hours
 		function calculateNightStatus(hours, minutes) {
 		    const currentHour = parseInt(hours, 10);
-		    const currentMinute = parseInt(minutes, 10);
-		    
 		    const hiddenNightStatus = document.getElementById('nightStatusInput');
 		    const selectElem = document.getElementById('statusSelect');
 		    const nightOption = selectElem ? selectElem.querySelector('option[value="DayNight"]') : null;
 
-		    let statusText = "";
+		    let statusText = (currentHour >= 1 && currentHour <= 7) ? "Full Night" : 
+		                     (currentHour === 23 || currentHour === 0) ? "Half Night" : "Short Night";
 
-		    // 1:00 AM (inclusive) to 4:00 AM (exclusive)
-		    if (currentHour >= 1 && currentHour < 4) {
-		        statusText = "Full Night";
-		    } 
-		    // 11:00 PM (23:00) up to 1:00 AM (00:59)
-		    else if (currentHour === 23 || currentHour === 0) {
-		        statusText = "Half Night";
-		    } 
-		    // Before 11:00 PM (23:00)
-		    else {
-		        statusText = "Short Night"; 
+		    if (hiddenNightStatus) {
+		        hiddenNightStatus.value = statusText; 
 		    }
-
-		    if (hiddenNightStatus) hiddenNightStatus.value = statusText; 
-		    if (nightOption) nightOption.textContent = `Night (${statusText})`;
+		    if (nightOption) {
+		        nightOption.textContent = `Night (${statusText})`;
+		    }
 		}
 
-
-		// AUTOMATIC INTERCEPTOR: Listens for the form submit and converts DayNight to Present
+		// 7. Event Listeners Initialization on document compilation
 		document.addEventListener("DOMContentLoaded", function() {
-		    checkTimeAndSetDefaultStatus(); 
-		    
+		    // Initial evaluation run on load to look up current date value and print initial console logs
+		    handleStatusChange();
+
 		    const statusSelect = document.getElementById('statusSelect');
 		    if (statusSelect) {
 		        statusSelect.addEventListener('change', handleStatusChange);
 		        
-		        // Find the parent HTML form element
+		        const dateInput = document.getElementById('todayDate');
+		        if (dateInput) {
+		            dateInput.addEventListener('change', handleStatusChange);
+		        }
+		        
 		        const parentForm = statusSelect.closest('form');
 		        if (parentForm) {
 		            parentForm.addEventListener('submit', function() {
-		                // If the user selects Night (DayNight), force it to Present right before saving
 		                if (statusSelect.value === 'DayNight') {
 		                    statusSelect.value = 'Present';
 		                }
@@ -341,5 +358,49 @@ function setCurrentTime(fieldId) {
 		});
 
 		
-		
-		
+		function showEditForm(event, id) {
+		    // 1. Stop the page from opening a new tab or reloading
+		    event.preventDefault(); 
+
+		    // 2. Fetch data from your backend controller
+		    fetch('/timesheets/edit/' + id)
+		        .then(response => {
+		            if (!response.ok) {
+		                throw new Error('Network response was not ok');
+		            }
+		            return response.json();
+		        })
+		        .then(data => {
+		            // 3. Fill the hidden ID input
+		            document.querySelector('#editTimesheetForm input[name="id"]').value = data.id || '';
+		            
+		            // 4. Fill text and date inputs
+		            document.querySelector('#editTimesheetForm input[name="date"]').value = data.date || '';
+		            document.querySelector('#editTimesheetForm input[name="location"]').value = data.location || '';
+		            
+		            // 5. Fill Time inputs (expects HH:mm format)
+		            document.querySelector('#editTimesheetForm input[name="timeIn"]').value = data.timeIn || '';
+		            document.querySelector('#editTimesheetForm input[name="timeOut"]').value = data.timeOut || '';
+		            document.querySelector('#editTimesheetForm input[name="nightTimeIn"]').value = data.nightTimeIn || '';
+		            document.querySelector('#editTimesheetForm input[name="nightTimeOut"]').value = data.nightTimeOut || '';
+		            
+		            // 6. Set Dropdown options to select matching values
+		            document.querySelector('#editTimesheetForm select[name="status"]').value = data.status || 'Present';
+		            document.querySelector('#editTimesheetForm select[name="nightStatus"]').value = data.nightStatus || 'No Night Shift';
+
+		            // 7. Update the submit action URL to point to the correct ID
+		            document.getElementById('editTimesheetForm').action = '/timesheets/update/' + id;
+
+		            // 8. Make the beautiful form pop up on screen
+		            document.getElementById('editFormContainer').style.display = 'flex';
+		        })
+		        .catch(error => {
+		            console.error('Error fetching entry details:', error);
+		            alert('Could not load data. Please try again.');
+		        });
+		}
+
+		function hideEditForm() {
+		    // Safely hide the pop-up box
+		    document.getElementById('editFormContainer').style.display = 'none';
+		}

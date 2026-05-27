@@ -16,10 +16,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.org.Entity.Timesheet;
 import com.org.Entity.User;
@@ -91,6 +92,31 @@ public class TimesheetController {
         return ResponseEntity.ok(results);
     }
       
+    @GetMapping("/edit/{id}")
+    @ResponseBody // Tells Spring to return raw data as JSON, not an HTML page view
+    public ResponseEntity<Timesheet> getTimesheetData(@PathVariable("id") Long id) {
+        // Find the single entry by its unique ID
+        Timesheet timesheet = timesheetService.getTimesheetById(id); 
+        
+        if (timesheet == null) {
+            return ResponseEntity.notFound().build(); // Sends a 404 error if not found
+        }
+        return ResponseEntity.ok(timesheet); // Sends a 200 OK status along with the entry data
+    }
+
+    
+    @PostMapping("/update/{id}")
+    public String updateTimesheet(
+            @PathVariable("id") Long id, 
+            @ModelAttribute("timesheet") Timesheet timesheet) {
+        
+        // Ensure the ID from the URL matches the object being saved
+        timesheet.setId(id); 
+        timesheetService.updateTimesheet(timesheet);
+        
+        return "redirect:/timesheets"; // Redirect back to the timesheet page
+    }
+    
     
     @GetMapping("/export")
     public void exportTimesheet(

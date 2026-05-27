@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://thymeleaf.org">
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -229,8 +229,10 @@ tr:hover {
 			<ul class="nav-links">
 				<li><a th:href="@{/timesheets}">Timesheet</a></li>
 				<li><a th:href="@{/profile}">My Profile</a></li>
-				<li><a th:href="@{/employees}">Employee List</a></li>
-				<li><a th:href="@{/purchases}">Purchase</a></li>
+				<li sec:authorize="hasAnyAuthority('admin', 'manager', 'engineer')">
+    <a th:href="@{/employees}">Employee List</a>
+                </li>
+                <li><a th:href="@{/purchases}">Purchase</a></li>
 				<li><a th:href="@{/labourRecords}">Labour Entries</a></li>
 				<li><a th:href="@{/logout}">Logout</a></li>
 			</ul>

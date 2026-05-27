@@ -38,6 +38,10 @@ public class Timesheet {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String outPhoto;
+    
 	public Timesheet(double d, double e) {
 		// TODO Auto-generated constructor stub
 	}
@@ -132,6 +136,14 @@ public class Timesheet {
 
 	public void setNightStatus(String nightStatus) {
 		this.nightStatus = nightStatus;
+	}
+
+	public String getOutPhoto() {
+		return outPhoto;
+	}
+
+	public void setOutPhoto(String outPhoto) {
+		this.outPhoto = outPhoto;
 	}
         
 }

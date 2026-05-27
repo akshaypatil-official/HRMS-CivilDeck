@@ -320,3 +320,192 @@ body {
         gap: 12px;
     }
 }
+
+
+.time-btn-group {
+	display: flex;
+	gap: 15px;
+	margin-bottom: 15px;
+}
+
+     /* Modern Edit Button Styling */
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* Spaces the icon and text nicely */
+    background-color: #fef3c7; /* Soft amber/yellow tint background */
+    color: #d97706; /* Rich amber text color */
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    transition: all 0.2s ease; /* Makes hover changes perfectly smooth */
+}
+
+/* Hover Effect when mouse is over the button */
+.btn-edit:hover {
+    background-color: #f59e0b; /* Bright solid amber background */
+    color: #ffffff; /* White text on hover */
+    border-color: #d97706;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2); /* Adds a warm glow shadow */
+}
+
+/* Active Click Effect when the button is pressed down */
+.btn-edit:active {
+    transform: scale(0.96); /* Slightly shrinks button on press */
+}
+
+/* Edit SVG Icon Custom Dimensions */
+.btn-icon {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor; /* Matches the text color automatically */
+    transition: transform 0.2s ease;
+}
+
+/* Soft rotation effect on the icon during hover */
+.btn-edit:hover .btn-icon {
+    transform: rotate(-10deg);
+}
+     
+  .form-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.6); /* Modern dark translucent tint */
+    backdrop-filter: blur(4px); /* Blurs the background page */
+    z-index: 999;
+    display: none; /* Controlled by JavaScript */
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 2. White Pop-up Box Layout */
+.modal-box {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px; /* Perfect width for screens */
+    max-height: 90vh; /* Limits height on small screens */
+    overflow-y: auto; /* Adds custom scrollbar if needed */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Header Text */
+.modal-box h2 {
+    margin: 0 0 24px 0;
+    color: #1e293b;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 3. Input Groups & Side-by-Side Rows */
+.form-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px; /* Spaces out side-by-side elements */
+}
+
+.form-row .form-group {
+    flex: 1; /* Makes them equal size */
+}
+
+/* Labels */
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+/* 4. Input Fields and Dropdowns Styling */
+.form-group input, 
+.form-group select {
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #334155;
+    background-color: #f8fafc;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Hover & Focus Effects */
+.form-group input:hover, 
+.form-group select:hover {
+    border-color: #94a3b8;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); /* Soft blue glow */
+}
+
+/* 5. Custom Buttons Design */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Cancel Button */
+.btn-cancel {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.btn-cancel:hover {
+    background-color: #e2e8f0;
+    color: #334155;
+}
+
+/* Submit Button */
+.btn-submit {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.btn-submit:hover {
+    background-color: #1d4ed8;
+}
+
+/* Clean up scrollbar visual for the modal box */
+.modal-box::-webkit-scrollbar {
+    width: 6px;
+}
+.modal-box::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 10px;
+}

@@ -9,6 +9,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.YearMonth;
@@ -123,22 +124,34 @@ public class TimesheetExcelExporter {
         int totalAbsent = 0, totalAttended = 0, totalHalfDay = 0, totalFullNight = 0;
         int totalHalfNight = 0, totalSunday = 0, totalHoliday = 0;
 
-        // 2. Loop through your data rows (assuming rows 1 to rowCount contain data)
+        // 2. Dynamically calculate Sundays ONLY up to today's date
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.YearMonth currentMonth = java.time.YearMonth.now();
+        int daysInMonth = currentMonth.lengthOfMonth();
+        
+        int sundaysTillToday = 0;
+        // Loop runs only from day 1 to today's current date number
+        for (int day = 1; day <= today.getDayOfMonth(); day++) {
+            java.time.LocalDate date = currentMonth.atDay(day);
+            if (date.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
+                sundaysTillToday++;
+            }
+        }
+
+        // 3. Loop through data rows (Row 1 to rowCount)
         for (int r = 1; r <= rowCount; r++) {
             Row dataRow = sheet.getRow(r);
             if (dataRow == null) continue;
             
-            // Replace '5' with the actual index of your Status column
             Cell statusCell = dataRow.getCell(5); 
             if (statusCell != null) {
-                String status = statusCell.getStringCellValue().toUpperCase();
+                String status = statusCell.getStringCellValue().toUpperCase().trim();
                 
-                // Update counts based on your status labels
                 switch (status) {
                     case "PRESENT": case "P": totalAttended++; break;
                     case "ABSENT":  case "A": totalAbsent++; break;
                     case "HALF DAY":          totalHalfDay++; break;
-                    case "SUNDAY":            totalSunday++; break;
+                    case "SUNDAY":            totalSunday++; break; 
                     case "HOLIDAY":           totalHoliday++; break;
                 }
             }
@@ -146,29 +159,30 @@ public class TimesheetExcelExporter {
             if (nightCell != null) {
                 String nightStatus = nightCell.getStringCellValue().toUpperCase().trim();
                 switch (nightStatus) {
-                    case "FULL NIGHT": totalFullNight++; break; // Do not add to totalAttended here
-                    case "HALF NIGHT": totalHalfNight++; break; // Do not add to totalAttended here
+                    case "FULL NIGHT": totalFullNight++; break;
+                    case "HALF NIGHT": totalHalfNight++; break;
                 }
             }
         }
 
-        // 3. Prepare Footer Labels and Values
+        // 4. Prepare Footer Calculation
         int footerStart = rowCount + 2;
-        int daysInMonth = java.time.YearMonth.now().lengthOfMonth();
 
-        // Formula calculates weights correctly: Full Night = 1.0, Half Night = 0.5, Half Day = 0.5
-        double totalAttendanceDays = totalAttended + (totalFullNight * 1.0) + (totalHalfNight * 0.5) + (totalHalfDay * 0.5);
+        // Formula adds only the Sundays passed up to today into total attendance
+        double totalAttendanceDays = totalAttended + sundaysTillToday + (totalFullNight * 1.0) + (totalHalfNight * 0.5) + (totalHalfDay * 0.5);
 
+        // 5. Generate Footer Rows
         String[] footerLabels = {"TOTAL DAYS", "ABSENT", "ATTENDED", "HALF DAY", "FULL NIGHT", "HALF NIGHT", "SUNDAY", "HOLIDAY", "TOTAL ATTENDANCE DAYS"};
-        Object[] footerValues = {daysInMonth, totalAbsent, totalAttended, totalHalfDay, totalFullNight, totalHalfNight, totalSunday, totalHoliday, totalAttendanceDays};
-        // 4. Generate Footer Rows
+        // Displays sundaysTillToday in the "SUNDAY" row of your footer
+        Object[] footerValues = {daysInMonth, totalAbsent, totalAttended, totalHalfDay, totalFullNight, totalHalfNight, sundaysTillToday, totalHoliday, totalAttendanceDays};
+        
         for (int i = 0; i < footerLabels.length; i++) {
             Row footerRow = sheet.createRow(footerStart + i);
             createCell(footerRow, 4, footerLabels[i], headerStyle);
             createCell(footerRow, 5, String.valueOf(footerValues[i]), bodyStyle);
         }
 
-        // 5. Finalize and Write
+        // 6. Finalize and Write
         ServletOutputStream outputStream = response.getOutputStream();
         workbook.write(outputStream);
         workbook.close();

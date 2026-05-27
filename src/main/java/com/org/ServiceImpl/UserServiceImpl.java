@@ -90,15 +90,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
+        // 1. Fetch user by email from the database
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("Invalid username or password.");
         }
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), 
-        		user.getPassword(), mapRolesToAuthorities(user.getRoles()));
+
+        // 2. Return the authenticated Spring Security user using your map helper
+        return new org.springframework.security.core.userdetails.User(
+            user.getEmail(), 
+            user.getPassword(), 
+            mapRolesToAuthorities(user.getRoles())
+        );
     }
 
+    // Your helper method is perfect - keeping it clean and robust
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
+        if (roles == null) {
+            return new ArrayList<>();
+        }
         return roles.stream()
                 .filter(role -> role != null && role.getName() != null && !role.getName().trim().isEmpty())
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
@@ -190,4 +200,5 @@ public class UserServiceImpl implements UserService {
 	    // Fetches the company name via table join using the user's ID
 	    return userRepository.findCompanyNameByUser_Id(user_Id); 
 	}
+	
 }	

@@ -24,6 +24,10 @@ public interface TimesheetService {
 		
 
 		List<Timesheet> findByUserAndMonth(String userId, int year, int month);
+
+		void updateTimesheet(Timesheet timesheet);
+
+		Timesheet getTimesheetById(Long id);
 	
 		
 	
